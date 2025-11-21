@@ -1623,3 +1623,17 @@ select.form-control {
     border: 1px solid #ccc;
   }
 }
+/*
+Source - https://stackoverflow.com/q
+Posted by BillyWalsh, modified by community. See post 'Timeline' for change history
+Retrieved 2025-11-21, License - CC BY-SA 4.0
+*/
+
+.text{ 
+    font-family: 'poppins-bold', sans-serif !important;
+    font-size: 6.3rem;
+    line-height: 1.333;
+    margin-top: 0;
+    color: #FFFFFF;
+    text-align: center;
+}
