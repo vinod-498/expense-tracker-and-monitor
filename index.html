@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExpenseTracker Pro - Advanced Business Expense Management</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/2.29.3/index.min.js"></script>
+</head>
+<body>
+    <!-- Notification System -->
+    <div id="notification-container" class="notification-container"></div>
+
+    @import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+html,body{
+  display: grid;
+  height: 100%;
+  width: 100%;
+  place-items: center;
+  background: -webkit-linear-gradient(left, #003366,#004080,#0059b3
+, #0073e6);
+}
+::selection{
+  background: #1a75ff;
+  color: #fff;
+}
+.wrapper{
+  overflow: hidden;
+  max-width: 390px;
+  background: #fff;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0px 15px 20px rgba(0,0,0,0.1);
+}
+.wrapper .title-text{
+  display: flex;
+  width: 200%;
+}
+.wrapper .title{
+  width: 50%;
+  font-size: 35px;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.6s cubic-bezier(0.68,-0.55,0.265,1.55);
+}
+.wrapper .slide-controls{
+  position: relative;
+  display: flex;
+  height: 50px;
+  width: 100%;
+  overflow: hidden;
+  margin: 30px 0 10px 0;
+  justify-content: space-between;
+  border: 1px solid lightgrey;
+  border-radius: 15px;
+}
+.slide-controls .slide{
+  height: 100%;
+  width: 100%;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 48px;
+  cursor: pointer;
+  z-index: 1;
+  transition: all 0.6s ease;
+}
+.slide-controls label.signup{
+  color: #000;
+}
+.slide-controls .slider-tab{
+  position: absolute;
+  height: 100%;
+  width: 50%;
+  left: 0;
+  z-index: 0;
+  border-radius: 15px;
+  background: -webkit-linear-gradient(left,#003366,#004080,#0059b3
+, #0073e6);
+  transition: all 0.6s cubic-bezier(0.68,-0.55,0.265,1.55);
+}
+input[type="radio"]{
+  display: none;
+}
+#signup:checked ~ .slider-tab{
+  left: 50%;
+}
+#signup:checked ~ label.signup{
+  color: #fff;
+  cursor: default;
+  user-select: none;
+}
+#signup:checked ~ label.login{
+  color: #000;
+}
+#login:checked ~ label.signup{
+  color: #000;
+}
+#login:checked ~ label.login{
+  cursor: default;
+  user-select: none;
+}
+.wrapper .form-container{
+  width: 100%;
+  overflow: hidden;
+}
+.form-container .form-inner{
+  display: flex;
+  width: 200%;
+}
+.form-container .form-inner form{
+  width: 50%;
+  transition: all 0.6s cubic-bezier(0.68,-0.55,0.265,1.55);
+}
+.form-inner form .field{
+  height: 50px;
+  width: 100%;
+  margin-top: 20px;
+}
+.form-inner form .field input{
+  height: 100%;
+  width: 100%;
+  outline: none;
+  padding-left: 15px;
+  border-radius: 15px;
+  border: 1px solid lightgrey;
+  border-bottom-width: 2px;
+  font-size: 17px;
+  transition: all 0.3s ease;
+}
+.form-inner form .field input:focus{
+  border-color: #1a75ff;
+  /* box-shadow: inset 0 0 3px #fb6aae; */
+}
+.form-inner form .field input::placeholder{
+  color: #999;
+  transition: all 0.3s ease;
+}
+form .field input:focus::placeholder{
+  color: #1a75ff;
+}
+.form-inner form .pass-link{
+  margin-top: 5px;
+}
+.form-inner form .signup-link{
+  text-align: center;
+  margin-top: 30px;
+}
+.form-inner form .pass-link a,
+.form-inner form .signup-link a{
+  color: #1a75ff;
+  text-decoration: none;
+}
+.form-inner form .pass-link a:hover,
+.form-inner form .signup-link a:hover{
+  text-decoration: underline;
+}
+form .btn{
+  height: 50px;
+  width: 100%;
+  border-radius: 15px;
+  position: relative;
+  overflow: hidden;
+}
+form .btn .btn-layer{
+  height: 100%;
+  width: 300%;
+  position: absolute;
+  left: -100%;
+  background: -webkit-linear-gradient(right,#003366,#004080,#0059b3
+, #0073e6);
+  border-radius: 15px;
+  transition: all 0.4s ease;;
+}
+form .btn:hover .btn-layer{
+  left: 0;
+}
+form .btn input[type="submit"]{
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+  position: relative;
+  background: none;
+  border: none;
+  color: #fff;
+  padding-left: 0;
+  border-radius: 15px;
+  font-size: 20px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+    <!-- Main Application -->
+    <div id="app" class="app hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">
+                        <h1>ExpenseTracker Pro</h1>
+                    </div>
+                    <div class="header-actions">
+                        <button id="theme-toggle" class="btn btn--outline btn--sm">🌙</button>
+                        <button id="notifications-btn" class="btn btn--outline btn--sm">🔔 <span id="notification-badge" class="badge hidden">0</span></button>
+                        <div class="user-menu">
+                            <span id="user-name">User</span>
+                            <button id="logout-btn" class="btn btn--outline btn--sm">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="app-nav">
+            <div class="container">
+                <div class="nav-tabs">
+                    <button class="nav-tab active" data-tab="dashboard">📊 Dashboard</button>
+                    <button class="nav-tab" data-tab="expenses">💰 Expenses</button>
+                    <button class="nav-tab" data-tab="budget">📈 Budget</button>
+                    <button class="nav-tab" data-tab="analytics">📉 Analytics</button>
+                    <button class="nav-tab" data-tab="approvals">✅ Approvals</button>
+                    <button class="nav-tab" data-tab="receipts">📄 Receipts</button>
+                    <button class="nav-tab" data-tab="settings">⚙️ Settings</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="app-main">
+            <div class="container">
+
+                <!-- Dashboard Tab -->
+                <div id="dashboard-tab" class="tab-content active">
+                    <div class="dashboard-header">
+                        <h2>Expense Dashboard</h2>
+                        <div class="dashboard-actions">
+                            <button id="export-data-btn" class="btn btn--outline">📊 Export Data</button>
+                            <button id="add-expense-btn" class="btn btn--primary">+ Add Expense</button>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="card dashboard-card">
+                            <div class="card__body">
+                                <h3>Total Expenses</h3>
+                                <div class="metric-value" id="total-expenses">$0</div>
+                                <div class="metric-change positive">+12% from last month</div>
+                            </div>
+                        </div>
+                        <div class="card dashboard-card">
+                            <div class="card__body">
+                                <h3>Pending Approvals</h3>
+                                <div class="metric-value" id="pending-approvals">0</div>
+                                <div class="metric-change">Awaiting review</div>
+                            </div>
+                        </div>
+                        <div class="card dashboard-card">
+                            <div class="card__body">
+                                <h3>Budget Usage</h3>
+                                <div class="metric-value" id="budget-usage">0%</div>
+                                <div class="metric-change warning">Budget alerts active</div>
+                            </div>
+                        </div>
+                        <div class="card dashboard-card">
+                            <div class="card__body">
+                                <h3>This Month</h3>
+                                <div class="metric-value" id="monthly-expenses">$0</div>
+                                <div class="metric-change">Current period</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-charts">
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Expense Trends</h3>
+                                <div class="chart-container" style="position: relative; height: 300px;">
+                                    <canvas id="expense-trend-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Category Breakdown</h3>
+                                <div class="chart-container" style="position: relative; height: 300px;">
+                                    <canvas id="category-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="recent-expenses">
+                        <div class="card">
+                            <div class="card__header">
+                                <h3>Recent Expenses</h3>
+                                <button class="btn btn--outline btn--sm" onclick="switchTab('expenses')">View All</button>
+                            </div>
+                            <div class="card__body">
+                                <div id="recent-expenses-list" class="expense-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expenses Tab -->
+                <div id="expenses-tab" class="tab-content">
+                    <div class="expenses-header">
+                        <h2>Expense Management</h2>
+                        <div class="expenses-actions">
+                            <button id="bulk-actions-btn" class="btn btn--outline">Bulk Actions</button>
+                            <button id="export-expenses-btn" class="btn btn--outline">📊 Export</button>
+                            <button class="btn btn--primary" onclick="showExpenseModal()">+ Add Expense</button>
+                        </div>
+                    </div>
+
+                    <div class="expenses-filters">
+                        <div class="filter-row">
+                            <input type="text" id="search-expenses" class="form-control" placeholder="🔍 Search expenses...">
+                            <select id="filter-category" class="form-control">
+                                <option value="">All Categories</option>
+                            </select>
+                            <select id="filter-status" class="form-control">
+                                <option value="">All Status</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Approved">Approved</option>
+                                <option value="Rejected">Rejected</option>
+                            </select>
+                            <input type="date" id="filter-date-from" class="form-control">
+                            <input type="date" id="filter-date-to" class="form-control">
+                            <button id="clear-filters-btn" class="btn btn--outline">Clear</button>
+                        </div>
+                    </div>
+
+                    <div class="expenses-list">
+                        <div id="expenses-table" class="table-responsive"></div>
+                    </div>
+                </div>
+
+                <!-- Budget Tab -->
+                <div id="budget-tab" class="tab-content">
+                    <div class="budget-header">
+                        <h2>Budget Management</h2>
+                        <button id="budget-forecast-btn" class="btn btn--outline">📈 Forecast</button>
+                    </div>
+
+                    <div class="budget-overview">
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Budget vs Actual</h3>
+                                <div class="chart-container" style="position: relative; height: 400px;">
+                                    <canvas id="budget-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="budget-categories" id="budget-categories-list"></div>
+                </div>
+
+                <!-- Analytics Tab -->
+                <div id="analytics-tab" class="tab-content">
+                    <div class="analytics-header">
+                        <h2>Advanced Analytics</h2>
+                        <div class="analytics-controls">
+                            <select id="analytics-period" class="form-control">
+                                <option value="month">This Month</option>
+                                <option value="quarter">This Quarter</option>
+                                <option value="year">This Year</option>
+                                <option value="custom">Custom Period</option>
+                            </select>
+                            <button id="compare-periods-btn" class="btn btn--outline">Compare Periods</button>
+                        </div>
+                    </div>
+
+                    <div class="analytics-grid">
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Spending Patterns</h3>
+                                <div class="chart-container" style="position: relative; height: 300px;">
+                                    <canvas id="spending-patterns-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Department Analysis</h3>
+                                <div class="chart-container" style="position: relative; height: 300px;">
+                                    <canvas id="department-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="forecast-section">
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Budget Forecast</h3>
+                                <div class="chart-container" style="position: relative; height: 300px;">
+                                    <canvas id="forecast-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Approvals Tab -->
+                <div id="approvals-tab" class="tab-content">
+                    <div class="approvals-header">
+                        <h2>Expense Approvals</h2>
+                        <div class="approval-stats">
+                            <span class="status status--warning" id="pending-count">0 Pending</span>
+                            <span class="status status--success" id="approved-count">0 Approved</span>
+                        </div>
+                    </div>
+
+                    <div class="approval-workflow">
+                        <div id="pending-approvals-list" class="approval-list"></div>
+                    </div>
+                </div>
+
+                <!-- Receipts Tab -->
+                <div id="receipts-tab" class="tab-content">
+                    <div class="receipts-header">
+                        <h2>Receipt Gallery</h2>
+                        <button id="upload-receipt-btn" class="btn btn--primary">📁 Upload Receipt</button>
+                    </div>
+
+                    <div class="receipt-upload-area">
+                        <div class="upload-zone" id="receipt-upload-zone">
+                            <div class="upload-content">
+                                <div class="upload-icon">📄</div>
+                                <p>Drag and drop receipts here or click to upload</p>
+                                <input type="file" id="receipt-file-input" multiple accept="image/*,.pdf" hidden>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="receipt-gallery" id="receipt-gallery"></div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div id="settings-tab" class="tab-content">
+                    <div class="settings-header">
+                        <h2>Settings & Configuration</h2>
+                    </div>
+
+                    <div class="settings-sections">
+                        <div class="card">
+                            <div class="card__header">
+                                <h3>Categories Management</h3>
+                            </div>
+                            <div class="card__body">
+                                <div class="category-manager">
+                                    <div class="add-category">
+                                        <input type="text" id="new-category-input" class="form-control" placeholder="Add new category">
+                                        <button id="add-category-btn" class="btn btn--primary">Add</button>
+                                    </div>
+                                    <div id="categories-list" class="categories-list"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card__header">
+                                <h3>Currency Settings</h3>
+                            </div>
+                            <div class="card__body">
+                                <select id="default-currency" class="form-control">
+                                    <option value="USD">USD - US Dollar</option>
+                                    <option value="EUR">EUR - Euro</option>
+                                    <option value="GBP">GBP - British Pound</option>
+                                    <option value="JPY">JPY - Japanese Yen</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card__header">
+                                <h3>Recurring Expenses</h3>
+                            </div>
+                            <div class="card__body">
+                                <button id="setup-recurring-btn" class="btn btn--outline">+ Setup Recurring Expense</button>
+                                <div id="recurring-expenses-list" class="recurring-list"></div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card__header">
+                                <h3>Notification Preferences</h3>
+                            </div>
+                            <div class="card__body">
+                                <div class="notification-settings">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="notify-budget-alerts" checked>
+                                        Budget threshold alerts
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="notify-approvals" checked>
+                                        Approval notifications
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="notify-recurring" checked>
+                                        Recurring expense reminders
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Expense Modal -->
+    <div id="expense-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="expense-modal-title">Add New Expense</h2>
+                <button class="modal-close" onclick="hideExpenseModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="expense-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="expense-amount">Amount *</label>
+                            <input type="number" id="expense-amount" class="form-control" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="expense-currency">Currency</label>
+                            <select id="expense-currency" class="form-control">
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                                <option value="JPY">JPY</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="expense-category">Category *</label>
+                            <select id="expense-category" class="form-control" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="expense-date">Date *</label>
+                            <input type="date" id="expense-date" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="expense-description">Description *</label>
+                        <textarea id="expense-description" class="form-control" rows="3" required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="expense-payment-method">Payment Method</label>
+                            <select id="expense-payment-method" class="form-control"></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="expense-department">Department</label>
+                            <select id="expense-department" class="form-control"></select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="expense-project">Project Code</label>
+                        <input type="text" id="expense-project" class="form-control" placeholder="PRJ-001">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="expense-recurring">
+                            Set as recurring expense
+                        </label>
+                    </div>
+
+                    <div id="recurring-options" class="recurring-options hidden">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="recurring-frequency">Frequency</label>
+                                <select id="recurring-frequency" class="form-control">
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="quarterly">Quarterly</option>
+                                    <option value="yearly">Yearly</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="recurring-end-date">End Date</label>
+                                <input type="date" id="recurring-end-date" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="expense-splitting">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="split-expense">
+                            Split across categories
+                        </label>
+                        <div id="split-categories" class="split-categories hidden"></div>
+                    </div>
+
+                    <div class="receipt-upload">
+                        <label class="form-label">Receipt</label>
+                        <div class="upload-area" id="modal-upload-area">
+                            <input type="file" id="modal-receipt-input" accept="image/*,.pdf" hidden>
+                            <div class="upload-placeholder">
+                                <span>📁 Click to upload receipt</span>
+                            </div>
+                        </div>
+                        <div id="uploaded-receipt-preview" class="receipt-preview hidden"></div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn--outline" onclick="hideExpenseModal()">Cancel</button>
+                        <button type="submit" class="btn btn--primary">Save Expense</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt View Modal -->
+    <div id="receipt-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Receipt Details</h2>
+                <button class="modal-close" onclick="hideReceiptModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="receipt-details" class="receipt-details"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Processing...</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
